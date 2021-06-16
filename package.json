@@ -1,0 +1,70 @@
+{
+  "name": "ada-placements-app",
+  "productName": "ada-placements-app",
+  "version": "1.0.7",
+  "description": "Create Internship Placements for Ada Developers Academy",
+  "main": "src/js/main/index.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jandress94/ada_placements.git"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Jim Andress",
+    "email": "jim.andress@gmail.com"
+  },
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "icon": "/Users/jim/Documents/other.nosync/ada_placements/ada-placements-app/src/Icon/adaIcon.icns"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "ada_placements_app"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "convert-array-to-csv": "^1.0.12",
+    "csv-parse": "^4.14.1",
+    "electron-context-menu": "^2.3.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "googleapis": "^39.2.0",
+    "javascript-lp-solver": "^0.4.24",
+    "minimist": "^1.2.5"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.54",
+    "@electron-forge/maker-deb": "^6.0.0-beta.54",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
+    "@electron-forge/maker-zip": "^6.0.0-beta.54",
+    "electron": "^9.4.0"
+  }
+}

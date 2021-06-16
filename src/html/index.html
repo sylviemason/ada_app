@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Ada Placement App</title>
+
+    <link rel="stylesheet" href="../css/index.css">
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <script src="../js/renderer/jq/jquery-3.4.1.js"></script>
+    <script src="../js/renderer/jq/jquery.tablesorter.js"></script>
+
+    <script src="../js/renderer/renderer_imports.js"></script>
+
+    <script src="../js/renderer/util/util.js"></script>
+    <script src="../js/renderer/util/io/util.io.js"></script>
+    <script src="../js/renderer/util/io/util.io.view.js"></script>
+
+    <script src="../js/renderer/app/app.js"></script>
+
+    <script src="../js/renderer/app/landing/landing.js"></script>
+    <script src="../js/renderer/app/landing/landing.model.js"></script>
+    <script src="../js/renderer/app/landing/landing.controller.js"></script>
+    <script src="../js/renderer/app/landing/landing.view.js"></script>
+
+    <script src="../js/renderer/app/scheduler/scheduler.js"></script>
+    <script src="../js/renderer/app/scheduler/scheduler.model.js"></script>
+    <script src="../js/renderer/app/scheduler/scheduler.model.validation.js"></script>
+    <script src="../js/renderer/app/scheduler/scheduler.model.id_lookup.js"></script>
+    <script src="../js/renderer/app/scheduler/scheduler.controller.js"></script>
+    <script src="../js/renderer/app/scheduler/scheduler.view.js"></script>
+
+    <script src="../js/renderer/app/placement/placement.js"></script>
+    <script src="../js/renderer/app/placement/placement.model.js"></script>
+    <script src="../js/renderer/app/placement/placement.controller.js"></script>
+    <script src="../js/renderer/app/placement/placement.view.js"></script>
+    <script>if (window.module) module = window.module;</script>
+
+    <script type="text/javascript">
+      $(document).ready(function(){
+        let $content_div = $('#content_div');
+        app.init_module($content_div, ipcRenderer);
+      });
+    </script>
+  </head>
+  <body>
+    <div id="content_div"></div>
+  </body>
+</html>
