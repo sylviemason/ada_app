@@ -19,6 +19,28 @@ scheduler.controller = (function () {
             });
     };
 
+    //handle loading of google sheet
+    const handle_google_sheet = function(){
+        util.io.get_google_sheet_id()
+        .then(result => {
+            if (!result.canceled) {
+                return util.io.load_google_sheet_data(result.sheet_id, 'A:E')
+                    .then(placement.model.load_scores_from_array)
+                    .then(() => placement.view.display_scores_page(placement.model.get_scores(), placement.model.get_settings()))
+                    .catch(err => {
+                        alert(err);
+                        landing.start();
+                    });
+            } else {
+                landing.start();
+            }
+        })
+        .catch(err => {
+            alert(err);
+            landing.start();
+        });
+    }
+
     const display_config_page = function() {
         scheduler.view.display_configs(scheduler.model.get_config());
     };

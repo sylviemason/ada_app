@@ -19,6 +19,10 @@ const get_menu_items = function() {
                     label: 'Load Config JSON',
                     click() {
                         _load_config_json();
+                    },
+                    label: 'Input Google Sheet Link',
+                    click(){
+                        scheduler.controller.handle_google_sheet();
                     }
                 }
             ]

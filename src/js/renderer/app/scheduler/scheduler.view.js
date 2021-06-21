@@ -34,6 +34,15 @@ scheduler.view = (function () {
                 scheduler.controller.handle_load_file();
             });
 
+            //load from sheet
+            let load_sheet_button = document.createElement('button');
+            scheduler_div.appendChild(load_sheet_button);
+
+            load_sheet_button.appendChild(document.createTextNode('Input Google Sheet Link'));
+            $(load_sheet_button).click(function(){
+                scheduler.controller.handle_load_sheet();
+            });
+
             return scheduler_div;
         };
     };
