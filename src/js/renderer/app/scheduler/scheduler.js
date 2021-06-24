@@ -8,6 +8,10 @@ const scheduler = (function () {
         ipcRenderer.on('scheduler.loadConfigJSON', function(e) {
             scheduler.controller.handle_load_file();
         });
+
+        ipcRenderer.on('scheduler.loadGoogleSheet', function (e) {
+            scheduler.controller.handle_google_sheet();
+        })
     };
 
     const get_landing_generator_fn = function () {

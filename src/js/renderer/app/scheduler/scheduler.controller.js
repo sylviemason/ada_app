@@ -22,24 +22,22 @@ scheduler.controller = (function () {
     //handle loading of google sheet
     const handle_google_sheet = function(){
         util.io.get_google_sheet_id()
-        .then(result => {
-            if (!result.canceled) {
-                return util.io.load_google_sheet_data(result.sheet_id, 'A:E')
-                    .then(placement.model.load_scores_from_array)
-                    .then(() => placement.view.display_scores_page(placement.model.get_scores(), placement.model.get_settings()))
-                    .catch(err => {
-                        alert(err);
-                        landing.start();
-                    });
-            } else {
+        //const students = util.io.load_student_data(spreadsheet_id, 'C:K');
+            .then(result => {
+                if (!result.canceled) {
+                   return util.io.load_data_to_JSON(result.sheet_id);
+                    //.then(alert(JSON.stringify(result.res)));
+                }
+                else {
+                    alert(err);
+                    landing.start();
+                }
+            })
+            .catch(err => {
+                alert(err);
                 landing.start();
-            }
-        })
-        .catch(err => {
-            alert(err);
-            landing.start();
-        });
-    }
+            });
+    };
 
     const display_config_page = function() {
         scheduler.view.display_configs(scheduler.model.get_config());
@@ -97,6 +95,7 @@ scheduler.controller = (function () {
     return {
         get_landing_generator_fn: get_landing_generator_fn,
         handle_load_file: handle_load_file,
+        handle_google_sheet: handle_google_sheet,
         handle_calculate_button_clicked: handle_calculate_button_clicked,
         handle_setting_change: handle_setting_change,
         handle_back_to_configs_button_clicked: handle_back_to_configs_button_clicked,

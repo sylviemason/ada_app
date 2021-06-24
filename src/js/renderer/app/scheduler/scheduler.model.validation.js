@@ -106,7 +106,10 @@ scheduler.model.validation = (function () {
                 if (!student.hasOwnProperty("name")) {
                     return reject('Student index ' + i + ' is missing the "name" field');
                 }
+
+                //TODO: add in multiple scores rather than one difficulty field
                 if (!student.hasOwnProperty("difficulty")) {
+                    
                     return reject('Student index ' + i + ' is missing the "difficulty" field');
                 }
                 if (!student.hasOwnProperty("preferences")) {

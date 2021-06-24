@@ -1,3 +1,6 @@
+const { auth } = require('googleapis/build/src/apis/abusiveexperiencereport');
+const { sheets } = require('googleapis/build/src/apis/sheets');
+
 util.io = (function () {
     let google_oAuth2Client;
 
@@ -135,8 +138,85 @@ util.io = (function () {
             .then(res => res.data.values);
     };
 
+    const load_data_to_JSON = function(sheet_id){
+        const companies = load_google_sheet_data(sheet_id, "'Team data'!B:N")
+            .then(create_team_JSON);
+        const students = load_google_sheet_data(sheet_id, "'Student data'!B:K")
+            .then(create_student_JSON);
+        Promise.all([companies, students])
+        .then(merge_JSON)
+        .then(result => JSON.stringify(result, null, "\t"))
+        .then(save_json);
+    };
+
+    const create_student_JSON = function (data){
+        const formatted = [];
+        for(let i=1; i<data.length; i++){
+            const row = {};
+            for(let j=0; j<data[0].length; j++){
+                if(isNaN(data[i][j])){
+                    row[data[0][j]] = data[i][j];
+                }
+                else{
+                    row[data[0][j]] = parseInt(data[i][j]);
+                }
+                
+            }
+            formatted.push(row);
+        } 
+        const final = {"students" : formatted};
+        return final;
+    }
+    
+    const create_team_JSON = function (data){
+        const companies = [];
+        const companies_added = [];
+        for(let i=1; i<data.length; i++){
+            const team = {};
+            let company_name = data[i][0];
+            for(let j=0; j<data[0].length; j++){
+                let team_name = company_name+": "+data[i][j];
+                if(j==1){
+                    team[data[0][j]]=team_name;
+                }
+                else{
+                    if(isNaN(data[i][j])){
+                        team[data[0][j]] = data[i][j];
+                    }
+                    else{
+                        team[data[0][j]] = parseInt(data[i][j]);
+                    }
+                }
+            }
+            if(! companies_added.includes(company_name)){
+                companies.push({
+                    "name" : company_name,
+                    "teams" : []
+                });
+                companies_added.push(company_name);
+            }
+            for(let k=0; k<companies.length; k++){
+                if(companies[k]["name"].localeCompare(company_name)==0){
+                    companies[k]["teams"].push(team);
+                }
+            }
+        }
+        const final = {"companies": companies};
+        return final;
+    }
+
+    const merge_JSON = function(companies, students){
+        const merged = companies.concat(students);
+        return merged;
+    }
+
     const save_to_file = function(filePath, data_fn) {
         return fs.writeFile(filePath, data_fn())
+            .then(() => { return {state: 'success'} });
+    };
+
+    const save_file = function(filePath, data) {
+        return fs.writeFile(filePath, data)
             .then(() => { return {state: 'success'} });
     };
 
@@ -162,6 +242,20 @@ util.io = (function () {
         }).then(result => {
             if (!result.canceled) {
                 return save_to_file(result.filePath, () => JSON.stringify(data_fn(), null, '\t'));
+            } else {
+                return {state: 'canceled'};
+            }
+        });
+    };
+
+    const save_json = function(data) {
+        return dialog.showSaveDialog({
+            filters: [
+                { name: 'JSON', extensions: ['json'] }
+            ]
+        }).then(result => {
+            if (!result.canceled) {
+                return save_file(result.filePath, data);
             } else {
                 return {state: 'canceled'};
             }
@@ -205,6 +299,7 @@ util.io = (function () {
         init_module: init_module,
         get_google_sheet_id: get_google_sheet_id,
         load_google_sheet_data: load_google_sheet_data,
+        load_data_to_JSON: load_data_to_JSON,
         save_to_csv: save_to_csv,
         save_to_sheet: save_to_sheet,
         save_to_json: save_to_json

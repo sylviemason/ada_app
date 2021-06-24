@@ -38,9 +38,9 @@ scheduler.view = (function () {
             let load_sheet_button = document.createElement('button');
             scheduler_div.appendChild(load_sheet_button);
 
-            load_sheet_button.appendChild(document.createTextNode('Input Google Sheet Link'));
-            $(load_sheet_button).click(function(){
-                scheduler.controller.handle_load_sheet();
+            load_sheet_button.appendChild(document.createTextNode('Load Google Sheet'));
+            $(load_sheet_button).click(function() {
+                scheduler.controller.handle_google_sheet();
             });
 
             return scheduler_div;
