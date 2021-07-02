@@ -22,11 +22,13 @@ scheduler.controller = (function () {
     //handle loading of google sheet
     const handle_google_sheet = function(){
         util.io.get_google_sheet_id()
-        //const students = util.io.load_student_data(spreadsheet_id, 'C:K');
             .then(result => {
                 if (!result.canceled) {
-                   return util.io.load_data_to_JSON(result.sheet_id);
-                    //.then(alert(JSON.stringify(result.res)));
+                   return util.io.load_data_to_JSON(result.sheet_id)
+                        .then(JSON.parse)
+                        .then(scheduler.model.set_config)
+                        .then(display_config_page)
+                        .catch(alert);
                 }
                 else {
                     alert(err);

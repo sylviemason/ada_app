@@ -120,6 +120,54 @@ scheduler.model = (function () {
         return count;
     };
 
+    const flip = function(score){
+        if(score == 1){
+            return 5;
+        }
+        if(score == 2){
+            return 4;
+        }
+        if(score == 4){
+            return 2;
+        }
+        if(score == 5){
+            return 1;
+        }
+        else{
+            return score;
+        }
+    };
+
+    const get_compatibility_score = function(student, company){
+        const scores = ["pair programming", "structure level", "ambiguity", "own project", "mentorship"];
+        const to_flip = ["ambiguity", "own project"]
+        var compatibility = 0;
+        for(s of scores){
+            if(student.hasOwnProperty(s) && company.hasOwnProperty(s)){
+                var diff = 0;
+                if(to_flip.includes(s)){
+                    diff = flip(company[s]) - flip(student[s]);
+                }
+                else{
+                    diff = company[s] - student[s];
+                }
+                if(diff < 0){
+                    compatibility += diff * config.settings[scheduler.constants.LESS_STRUCTURED_TEAM_WEIGHT];
+                }
+                else{
+                    compatibility += diff * config.settings[scheduler.constants.MORE_STRUCTURED_TEAM_WEIGHT];
+                }
+            }
+            else{
+                alert(JSON.stringify(student, null, "\t"));
+                alert(JSON.stringify(company, null, "\t"));
+                alert(JSON.stringify(s, null, "\t"));
+                break;
+            }
+        }
+        return compatibility;
+    }
+
     const _create_ampl_model = function () {
         _var_name_to_data_map = {};
 
@@ -164,6 +212,7 @@ scheduler.model = (function () {
                             let over_val = _get_override_val(config.overrides, student.name, team.name);
 
                             let score = 0;
+
                             if (is_student_pref && is_team_pref) {
                                 score += config.settings[scheduler.constants.IS_MUTUAL_PREF_SCORE];
                             } else if (is_student_pref) {
@@ -171,19 +220,23 @@ scheduler.model = (function () {
                             } else if (is_team_pref) {
                                 score += config.settings[scheduler.constants.IS_TEAM_PREF_SCORE];
                             }
+                            
+                            //generate compatibility score
+                            let compatibility_score = get_compatibility_score(student, team);
+                            score += compatibility_score;
 
-                            let difficulty_diff = student.difficulty - team.difficulty;
-                            if (difficulty_diff === 2) {
-                                score += config.settings[scheduler.constants.DIFFICULTY_DIFF_2_SCORE];
-                            } else if (difficulty_diff === 1) {
-                                score += config.settings[scheduler.constants.DIFFICULTY_DIFF_1_SCORE];
-                            } else if (difficulty_diff === 0) {
-                                score += config.settings[scheduler.constants.DIFFICULTY_DIFF_0_SCORE];
-                            } else if (difficulty_diff === -1) {
-                                score += config.settings[scheduler.constants.DIFFICULTY_DIFF_MINUS1_SCORE];
-                            } else if (difficulty_diff === -2) {
-                                score += config.settings[scheduler.constants.DIFFICULTY_DIFF_MINUS2_SCORE];
-                            }
+                            // let difficulty_diff = student.difficulty - team.difficulty;
+                            // if (difficulty_diff === 2) {
+                            //     score += config.settings[scheduler.constants.DIFFICULTY_DIFF_2_SCORE];
+                            // } else if (difficulty_diff === 1) {
+                            //     score += config.settings[scheduler.constants.DIFFICULTY_DIFF_1_SCORE];
+                            // } else if (difficulty_diff === 0) {
+                            //     score += config.settings[scheduler.constants.DIFFICULTY_DIFF_0_SCORE];
+                            // } else if (difficulty_diff === -1) {
+                            //     score += config.settings[scheduler.constants.DIFFICULTY_DIFF_MINUS1_SCORE];
+                            // } else if (difficulty_diff === -2) {
+                            //     score += config.settings[scheduler.constants.DIFFICULTY_DIFF_MINUS2_SCORE];
+                            // }
 
                             score += (2 * Math.random() - 1) * config.settings[scheduler.constants.RANDOM_SCORE_MAX];
 
@@ -195,7 +248,8 @@ scheduler.model = (function () {
                                 timeslot: timeslot,
                                 is_student_pref: is_student_pref,
                                 is_team_pref: is_team_pref,
-                                difficulty_diff: difficulty_diff,
+                                //difficulty_diff: difficulty_diff,
+                                compatibility: compatibility_score,
                                 is_override: over_val,
                                 score: score
                             };
@@ -506,20 +560,26 @@ scheduler.model = (function () {
 
         // scoring
 
-        _add_val_if_not_exists(settings, scheduler.constants.DIFFICULTY_DIFF_2_SCORE,
-            scheduler.constants.DEFAULT_DIFFICULTY_DIFF_2_SCORE);
+        // _add_val_if_not_exists(settings, scheduler.constants.DIFFICULTY_DIFF_2_SCORE,
+        //     scheduler.constants.DEFAULT_DIFFICULTY_DIFF_2_SCORE);
 
-        _add_val_if_not_exists(settings, scheduler.constants.DIFFICULTY_DIFF_1_SCORE,
-            scheduler.constants.DEFAULT_DIFFICULTY_DIFF_1_SCORE);
+        // _add_val_if_not_exists(settings, scheduler.constants.DIFFICULTY_DIFF_1_SCORE,
+        //     scheduler.constants.DEFAULT_DIFFICULTY_DIFF_1_SCORE);
 
-        _add_val_if_not_exists(settings, scheduler.constants.DIFFICULTY_DIFF_0_SCORE,
-            scheduler.constants.DEFAULT_DIFFICULTY_DIFF_0_SCORE);
+        // _add_val_if_not_exists(settings, scheduler.constants.DIFFICULTY_DIFF_0_SCORE,
+        //     scheduler.constants.DEFAULT_DIFFICULTY_DIFF_0_SCORE);
 
-        _add_val_if_not_exists(settings, scheduler.constants.DIFFICULTY_DIFF_MINUS1_SCORE,
-            scheduler.constants.DEFAULT_DIFFICULTY_DIFF_MINUS1_SCORE);
+        // _add_val_if_not_exists(settings, scheduler.constants.DIFFICULTY_DIFF_MINUS1_SCORE,
+        //     scheduler.constants.DEFAULT_DIFFICULTY_DIFF_MINUS1_SCORE);
 
-        _add_val_if_not_exists(settings, scheduler.constants.DIFFICULTY_DIFF_MINUS2_SCORE,
-            scheduler.constants.DEFAULT_DIFFICULTY_DIFF_MINUS2_SCORE);
+        // _add_val_if_not_exists(settings, scheduler.constants.DIFFICULTY_DIFF_MINUS2_SCORE,
+        //     scheduler.constants.DEFAULT_DIFFICULTY_DIFF_MINUS2_SCORE);
+
+        _add_val_if_not_exists(settings, scheduler.constants.MORE_STRUCTURED_TEAM_WEIGHT,
+            scheduler.constants.DEFAULT_MORE_STRUCTURED_TEAM_WEIGHT);
+
+        _add_val_if_not_exists(settings, scheduler.constants.LESS_STRUCTURED_TEAM_WEIGHT,
+            scheduler.constants.DEFAULT_LESS_STRUCTURED_TEAM_WEIGHT);
 
         _add_val_if_not_exists(settings, scheduler.constants.IS_STUDENT_PREF_SCORE,
             scheduler.constants.DEFAULT_IS_STUDENT_PREF_SCORE);
@@ -545,7 +605,8 @@ scheduler.model = (function () {
     };
 
     const _save_schedule_to_array = function(schedule) {
-        let values = [['Student', 'Company', 'Team', 'Interviewer', 'Timeslot', 'Student Preference?', 'Team Preference?', 'Student - Team Difficulty', 'Score', 'Override']];
+        //let values = [['Student', 'Company', 'Team', 'Interviewer', 'Timeslot', 'Student Preference?', 'Team Preference?', 'Student - Team Difficulty', 'Score', 'Override']];
+        let values = [['Student', 'Company', 'Team', 'Interviewer', 'Timeslot', 'Student Preference?', 'Team Preference?', 'Compatibility', 'Score', 'Override']];
         for (let i = 0; i < schedule.length; i++) {
             let s = schedule[i];
 
@@ -557,7 +618,8 @@ scheduler.model = (function () {
                 s.timeslot,
                 s.is_student_pref.toString(),
                 s.is_team_pref.toString(),
-                s.difficulty_diff,
+                //s.difficulty_diff,
+                s.compatibility,
                 s.score,
                 s.is_override === null ? s.is_override : s.is_override.toString()
             ]);

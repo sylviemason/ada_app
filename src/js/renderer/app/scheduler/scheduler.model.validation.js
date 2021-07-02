@@ -59,9 +59,9 @@ scheduler.model.validation = (function () {
                     if (!team.hasOwnProperty("positions")) {
                         return reject('Company index ' + i + ', Team index ' + j + ' is missing the "positions" field');
                     }
-                    if (!team.hasOwnProperty("difficulty")) {
-                        return reject('Company index ' + i + ', Team index ' + j + ' is missing the "difficulty" field');
-                    }
+                    // if (!team.hasOwnProperty("difficulty")) {
+                    //     return reject('Company index ' + i + ', Team index ' + j + ' is missing the "difficulty" field');
+                    // }
                     if (!team.hasOwnProperty("preferences")) {
                         return reject('Company index ' + i + ', Team index ' + j + ' is missing the "preferences" field');
                     }
@@ -108,10 +108,10 @@ scheduler.model.validation = (function () {
                 }
 
                 //TODO: add in multiple scores rather than one difficulty field
-                if (!student.hasOwnProperty("difficulty")) {
+                // if (!student.hasOwnProperty("difficulty")) {
                     
-                    return reject('Student index ' + i + ' is missing the "difficulty" field');
-                }
+                //     return reject('Student index ' + i + ' is missing the "difficulty" field');
+                // }
                 if (!student.hasOwnProperty("preferences")) {
                     return reject('Student index ' + i + ' is missing the "preferences" field');
                 }

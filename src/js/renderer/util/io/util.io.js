@@ -139,14 +139,16 @@ util.io = (function () {
     };
 
     const load_data_to_JSON = function(sheet_id){
-        const companies = load_google_sheet_data(sheet_id, "'Team data'!B:N")
+        const timeslots = generate_timeslots();
+        const companies = load_google_sheet_data(sheet_id, "'Team Responses Edit'!B:N")
             .then(create_team_JSON);
-        const students = load_google_sheet_data(sheet_id, "'Student data'!B:K")
+        const students = load_google_sheet_data(sheet_id, "'Student Responses Editable'!B:K")
             .then(create_student_JSON);
-        Promise.all([companies, students])
-        .then(merge_JSON)
-        .then(result => JSON.stringify(result, null, "\t"))
-        .then(save_json);
+        const overrides = generate_overrides();
+        return Promise.all([timeslots, companies, students, overrides])
+            .then(merge_JSON)
+            .then(result => JSON.stringify(result, null, "\t"))
+            //.then(save_json);
     };
 
     const create_student_JSON = function (data){
@@ -155,12 +157,26 @@ util.io = (function () {
             const row = {};
             for(let j=0; j<data[0].length; j++){
                 if(isNaN(data[i][j])){
-                    row[data[0][j]] = data[i][j];
+                    if(data[0][j].localeCompare("Preferences")==0){
+                        if(data[i][j] != null){
+                            const prefs = data[i][j].split(",");
+                            const mod = [];
+                            for(const p of prefs){
+                                mod.push("Amazon: " + p);
+                            }
+                            row[data[0][j].toLowerCase()] = mod;
+                        }
+                        else{
+                            row[data[0][j].toLowerCase()] = [];
+                        }
+                    }
+                    else{
+                        row[data[0][j].toLowerCase()] = data[i][j];
+                    }
                 }
                 else{
-                    row[data[0][j]] = parseInt(data[i][j]);
+                    row[data[0][j].toLowerCase()] = parseInt(data[i][j]);
                 }
-                
             }
             formatted.push(row);
         } 
@@ -177,14 +193,26 @@ util.io = (function () {
             for(let j=0; j<data[0].length; j++){
                 let team_name = company_name+": "+data[i][j];
                 if(j==1){
-                    team[data[0][j]]=team_name;
+                    team[data[0][j].toLowerCase()]=team_name;
                 }
                 else{
                     if(isNaN(data[i][j])){
-                        team[data[0][j]] = data[i][j];
+                        if(data[0][j].localeCompare("Interviewers")==0){
+                            const dict = {};
+                            dict["name"] = data[i][j];
+                            dict["timeslots"] = ["Monday_01", "Tuesday_01", "Wednesday_01"];
+                            const arr = [dict];
+                            team[data[0][j].toLowerCase()] = arr;       
+                        }
+                        else if(data[0][j].localeCompare("Preferences")==0){
+                            team[data[0][j].toLowerCase()] = [];
+                        }
+                        else{
+                            team[data[0][j].toLowerCase()] = data[i][j];
+                        }                 
                     }
                     else{
-                        team[data[0][j]] = parseInt(data[i][j]);
+                        team[data[0][j].toLowerCase()] = parseInt(data[i][j]);
                     }
                 }
             }
@@ -205,9 +233,38 @@ util.io = (function () {
         return final;
     }
 
-    const merge_JSON = function(companies, students){
-        const merged = companies.concat(students);
-        return merged;
+    const merge_JSON = function(data){
+        console.log(data);
+        const timeslots = data[0];
+        const companies = data[1];
+        const students = data[2];
+        const overrides = data[3];
+        const final = {
+            ...timeslots,
+            ...companies,
+            ...students,
+            ...overrides
+        };
+        return final;
+    }
+
+    const generate_timeslots = function(){
+        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+        const times = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+        const timeslots = [];
+        for(let i=0; i<days.length; i++){
+            day = {};
+            day["day"] = days[i];
+            day["times"] = times;
+            timeslots.push(day);
+        }
+        //return timeslots;
+        const final = {"timeslots" : timeslots};
+        return final;
+    }
+
+    const generate_overrides = function(){
+        return {"overrides": []};
     }
 
     const save_to_file = function(filePath, data_fn) {

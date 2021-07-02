@@ -523,11 +523,13 @@ scheduler.view = (function () {
         scoring_h1.appendChild(document.createTextNode('Scoring Settings'));
         scoring_div.appendChild(scoring_h1);
         // Todo: change strings
-        scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_2_SCORE,"Student - Team Difficulty Score 2"));
-        scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_1_SCORE,"Student - Team Difficulty Score 1"));
-        scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_0_SCORE,"Student - Team Difficulty Score 0"));
-        scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_MINUS1_SCORE,"Student - Team Difficulty Score -1"));
-        scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_MINUS2_SCORE,"Student - Team Difficulty Score -2"));
+        // scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_2_SCORE,"Student - Team Difficulty Score 2"));
+        // scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_1_SCORE,"Student - Team Difficulty Score 1"));
+        // scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_0_SCORE,"Student - Team Difficulty Score 0"));
+        // scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_MINUS1_SCORE,"Student - Team Difficulty Score -1"));
+        // scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_MINUS2_SCORE,"Student - Team Difficulty Score -2"));
+        scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.MORE_STRUCTURED_TEAM_WEIGHT,"Weight for more structured team score"));
+        scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.LESS_STRUCTURED_TEAM_WEIGHT,"Weight for less structured team score"));
         scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.IS_STUDENT_PREF_SCORE,"Student Preference Score"));
         scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.IS_TEAM_PREF_SCORE,"Team Preference Score"));
         scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.IS_MUTUAL_PREF_SCORE,"Mutual Preference Score"));
@@ -668,7 +670,7 @@ scheduler.view = (function () {
         schedule_table_head.appendChild(header_row);
 
         let col_names = ['student name', 'company name', 'team name', 'interviewer name', 'timeslot',
-            'is student preference?', 'is team preference?', 'student - team difficulty', 'score', 'override'];
+            'is student preference?', 'is team preference?', 'compatability', 'score', 'override'];
         for (let i = 0; i < col_names.length; i++) {
             let column_name = col_names[i];
             let header = document.createElement('th');
@@ -687,7 +689,8 @@ scheduler.view = (function () {
             row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].timeslot)));
             row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].is_student_pref)));
             row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].is_team_pref)));
-            row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].difficulty_diff)));
+            //row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].difficulty_diff)));
+            row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].compatibility)));
             row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].score)));
             row.appendChild(_create_table_entry(_create_overwrite_select(solved_model.schedule[i])));
             schedule_table_body.appendChild(row);
