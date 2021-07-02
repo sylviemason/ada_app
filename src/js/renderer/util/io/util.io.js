@@ -142,7 +142,7 @@ util.io = (function () {
         const timeslots = generate_timeslots();
         const companies = load_google_sheet_data(sheet_id, "'Team Responses Edit'!B:N")
             .then(create_team_JSON);
-        const students = load_google_sheet_data(sheet_id, "'Student Responses Editable'!B:K")
+        const students = load_google_sheet_data(sheet_id, "'Student Mentorship Edit'!A:K")
             .then(create_student_JSON);
         const overrides = generate_overrides();
         return Promise.all([timeslots, companies, students, overrides])
@@ -159,7 +159,7 @@ util.io = (function () {
                 if(isNaN(data[i][j])){
                     if(data[0][j].localeCompare("Preferences")==0){
                         if(data[i][j] != null){
-                            const prefs = data[i][j].split(",");
+                            const prefs = data[i][j].split(", ");
                             const mod = [];
                             for(const p of prefs){
                                 mod.push("Amazon: " + p);
@@ -200,7 +200,7 @@ util.io = (function () {
                         if(data[0][j].localeCompare("Interviewers")==0){
                             const dict = {};
                             dict["name"] = data[i][j];
-                            dict["timeslots"] = ["Monday_01", "Tuesday_01", "Wednesday_01"];
+                            dict["timeslots"] = [];
                             const arr = [dict];
                             team[data[0][j].toLowerCase()] = arr;       
                         }
@@ -212,6 +212,12 @@ util.io = (function () {
                         }                 
                     }
                     else{
+                        if(data[0][j].localeCompare("Positions")==0){
+                            for(let x=1; x<=data[i][j]; x++){
+                                team["interviewers"][0]["timeslots"].push("Monday_0" + x.toString());
+                            }
+                            team[data[0][j].toLowerCase()] = parseInt(data[i][j]);
+                        }
                         team[data[0][j].toLowerCase()] = parseInt(data[i][j]);
                     }
                 }
