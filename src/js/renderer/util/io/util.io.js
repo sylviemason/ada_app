@@ -140,9 +140,9 @@ util.io = (function () {
 
     const load_data_to_JSON = function(sheet_id){
         const timeslots = generate_timeslots();
-        const companies = load_google_sheet_data(sheet_id, "'Team Responses Edit'!B:N")
+        const companies = load_google_sheet_data(sheet_id, "'Team Responses Edit'!B:Q")
             .then(create_team_JSON);
-        const students = load_google_sheet_data(sheet_id, "'Student Mentorship Edit'!A:K")
+        const students = load_google_sheet_data(sheet_id, "'Student Mentorship Edit'!A:M")
             .then(create_student_JSON);
         return Promise.all([timeslots, companies, students])
             .then(merge_JSON)

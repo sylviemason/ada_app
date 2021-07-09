@@ -670,7 +670,7 @@ scheduler.view = (function () {
         schedule_table_head.appendChild(header_row);
 
         let col_names = ['student name', 'company name', 'team name', 'interviewer name', 'timeslot',
-            'is student preference?', 'is team preference?', 'compatability', 'score', 'override'];
+            'is student preference?', 'is team preference?', 'compatability', 'score', 'difficulty difference', 'override'];
         for (let i = 0; i < col_names.length; i++) {
             let column_name = col_names[i];
             let header = document.createElement('th');
@@ -689,9 +689,9 @@ scheduler.view = (function () {
             row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].timeslot)));
             row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].is_student_pref)));
             row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].is_team_pref)));
-            //row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].difficulty_diff)));
             row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].compatibility)));
             row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].score)));
+            row.appendChild(_create_table_entry(document.createTextNode(solved_model.schedule[i].difficulty_diff)));
             row.appendChild(_create_table_entry(_create_overwrite_select(solved_model.schedule[i])));
             schedule_table_body.appendChild(row);
         }

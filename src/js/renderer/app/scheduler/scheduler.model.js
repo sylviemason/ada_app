@@ -139,23 +139,30 @@ scheduler.model = (function () {
     };
 
     const get_compatibility_score = function(student, company){
-        const scores = ["pair programming", "structure level", "ambiguity", "own project", "mentorship"];
+        const scores = ["field", "structure level", "ambiguity", "own project", "mentorship", "working together"];
         const to_flip = ["ambiguity", "own project"]
         var compatibility = 0;
         for(s of scores){
             if(student.hasOwnProperty(s) && company.hasOwnProperty(s)){
-                var diff = 0;
-                if(to_flip.includes(s)){
-                    diff = flip(company[s]) - flip(student[s]);
+                if(s.localeCompare("field")==0){
+                    if(student[s]===company[s]){
+                        compatibility += 20; 
+                    }
                 }
                 else{
-                    diff = company[s] - student[s];
-                }
-                if(diff < 0){
-                    compatibility += diff * config.settings[scheduler.constants.LESS_STRUCTURED_TEAM_WEIGHT];
-                }
-                else{
-                    compatibility += diff * config.settings[scheduler.constants.MORE_STRUCTURED_TEAM_WEIGHT];
+                    var diff = 0;
+                    if(to_flip.includes(s)){
+                        diff = flip(company[s]) - flip(student[s]);
+                    }
+                    else{
+                        diff = company[s] - student[s];
+                    }
+                    if(diff < 0){
+                        compatibility += diff * config.settings[scheduler.constants.LESS_STRUCTURED_TEAM_WEIGHT];
+                    }
+                    else{
+                        compatibility += diff * config.settings[scheduler.constants.MORE_STRUCTURED_TEAM_WEIGHT];
+                    }
                 }
             }
             else{
@@ -225,7 +232,7 @@ scheduler.model = (function () {
                             let compatibility_score = get_compatibility_score(student, team);
                             score += compatibility_score;
 
-                            // let difficulty_diff = student.difficulty - team.difficulty;
+                            let difficulty_diff = student.score - team.score;
                             // if (difficulty_diff === 2) {
                             //     score += config.settings[scheduler.constants.DIFFICULTY_DIFF_2_SCORE];
                             // } else if (difficulty_diff === 1) {
@@ -248,10 +255,10 @@ scheduler.model = (function () {
                                 timeslot: timeslot,
                                 is_student_pref: is_student_pref,
                                 is_team_pref: is_team_pref,
-                                //difficulty_diff: difficulty_diff,
                                 compatibility: compatibility_score,
+                                score: score,
+                                difficulty_diff: difficulty_diff,
                                 is_override: over_val,
-                                score: score
                             };
 
                             score_terms.push(score + " * " + var_name);
