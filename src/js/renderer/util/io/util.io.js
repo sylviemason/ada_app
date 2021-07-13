@@ -28,8 +28,10 @@ util.io = (function () {
             .then(result => {
                 if (!result.canceled) {
                     let sheet_id = sheet_url_to_sheet_id(result.sheet_url);
+                    let student_columns = result.student_columns;
+                    let team_columns = result.team_columns;
                     if (sheet_id !== null) {
-                        return {canceled: false, sheet_id: sheet_id};
+                        return {canceled: false, sheet_id: sheet_id, student_columns: student_columns, team_columns: team_columns};
                     } else {
                         return Promise.reject('The URL did not match the expected sheet id pattern');
                     }
@@ -138,11 +140,11 @@ util.io = (function () {
             .then(res => res.data.values);
     };
 
-    const load_data_to_JSON = function(sheet_id){
+    const load_data_to_JSON = function(sheet_id, student_columns, team_columns){
         const timeslots = generate_timeslots();
-        const companies = load_google_sheet_data(sheet_id, "'Team Responses Edit'!B:Q")
+        const companies = load_google_sheet_data(sheet_id, ("'Team Responses Edit'!"+team_columns))
             .then(create_team_JSON);
-        const students = load_google_sheet_data(sheet_id, "'Student Mentorship Edit'!A:M")
+        const students = load_google_sheet_data(sheet_id, ("'Student Mentorship Edit'!"+student_columns))
             .then(create_student_JSON);
         return Promise.all([timeslots, companies, students])
             .then(merge_JSON)

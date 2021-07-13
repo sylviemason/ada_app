@@ -24,14 +24,13 @@ scheduler.controller = (function () {
         util.io.get_google_sheet_id()
             .then(result => {
                 if (!result.canceled) {
-                   return util.io.load_data_to_JSON(result.sheet_id)
+                   return util.io.load_data_to_JSON(result.sheet_id, result.student_columns, result.team_columns)
                         .then(JSON.parse)
                         .then(scheduler.model.set_config)
                         .then(display_config_page)
                         .catch(alert);
                 }
                 else {
-                    alert(err);
                     landing.start();
                 }
             })

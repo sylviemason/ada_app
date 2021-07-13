@@ -176,6 +176,7 @@ util.io.view = (function () {
             let url_div = document.createElement('div');
             $container.append(url_div);
 
+            //inputs for google sheet link
             let url_p = document.createElement('p');
             url_div.appendChild(url_p);
             url_p.appendChild(document.createTextNode('Paste the URL of a Google Sheet: '));
@@ -184,11 +185,29 @@ util.io.view = (function () {
             url_div.appendChild(url_input);
             url_input.setAttribute('type', 'text');
 
+            //inputs for columns
+            let columns_p = document.createElement('p');
+            url_div.appendChild(columns_p);
+            columns_p.appendChild(document.createTextNode('Input the columns to be read for student data: '));
+
+            let columns_input = document.createElement('input');
+            url_div.appendChild(columns_input);
+            columns_input.setAttribute('type', 'text');
+
+            let columns_p2 = document.createElement('p');
+            url_div.appendChild(columns_p2);
+            columns_p2.appendChild(document.createTextNode('Input the columns to be read for team data: '));
+
+            let columns_input2 = document.createElement('input');
+            url_div.appendChild(columns_input2);
+            columns_input2.setAttribute('type', 'text');
+
             let enter_button = document.createElement('button');
             url_div.appendChild(enter_button);
             enter_button.appendChild(document.createTextNode('Enter'));
             $(enter_button).click(function () {
-                return resolve({canceled: false, sheet_url: url_input.value});
+                return resolve({canceled: false, sheet_url: url_input.value, student_columns: columns_input.value, 
+                team_columns: columns_input2.value});
             });
 
             let cancel_button = document.createElement('button');
