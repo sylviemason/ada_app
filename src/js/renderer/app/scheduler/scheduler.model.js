@@ -166,9 +166,6 @@ scheduler.model = (function () {
                 }
             }
             else{
-                alert(JSON.stringify(student, null, "\t"));
-                alert(JSON.stringify(company, null, "\t"));
-                alert(JSON.stringify(s, null, "\t"));
                 break;
             }
         }

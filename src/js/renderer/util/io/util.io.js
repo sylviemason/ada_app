@@ -131,7 +131,7 @@ util.io = (function () {
             });
     };
 
-    const load_google_sheet_data = function (sheet_id, range) {
+    const load_google_sheet_data_old = function (sheet_id, range) {
         return get_google_sheets()
             .then(sheets => sheets.spreadsheets.values.get({
                 spreadsheetId: sheet_id,
@@ -140,17 +140,41 @@ util.io = (function () {
             .then(res => res.data.values);
     };
 
-    const load_data_to_JSON = function(sheet_id, student_columns, team_columns){
+    const load_google_sheet_data = async function (sheet_id, range) {
+        const sheets = await get_google_sheets();
+        const data = await sheets.spreadsheets.values.get({
+            spreadsheetId: sheet_id,
+            range: range
+        });
+        return data.data.values;
+    };
+
+    //TODO: replicate function with async await
+    const load_data_to_JSON_old = function(sheet_id, student_columns, team_columns){
         const timeslots = generate_timeslots();
-        const companies = load_google_sheet_data(sheet_id, ("'Team Responses Edit'!"+team_columns))
+        const companies = load_google_sheet_data(sheet_id, ("'Team Responses'!"+team_columns))
             .then(create_team_JSON);
-        const students = load_google_sheet_data(sheet_id, ("'Student Mentorship Edit'!"+student_columns))
+            //.then(add_interview_data)
+        const students = load_google_sheet_data(sheet_id, ("'Student Responses'!"+student_columns))
             .then(create_student_JSON);
         return Promise.all([timeslots, companies, students])
             .then(merge_JSON)
             .then(result => JSON.stringify(result, null, "\t"));
             //.then(save_json);
     };
+
+    const load_data_to_JSON = async function(sheet_id, student_columns, team_columns){
+        const timeslots = generate_timeslots();
+        const team_data = await load_google_sheet_data(sheet_id, ("'Team Responses'!"+team_columns));
+        const student_data = await load_google_sheet_data(sheet_id, ("'Student Responses'!"+student_columns));
+        const interview_data = await load_google_sheet_data(sheet_id, "'Team Interview Week Responses'!B:K");
+        const companies = await create_team_JSON(team_data);
+        const students = await create_student_JSON(student_data);
+        const updated_companies = await add_interview_data(interview_data, companies);
+        const json = await merge_JSON([timeslots, updated_companies, students]);
+        const ret = JSON.stringify(json, null, "\t");
+        return ret;
+    }
 
     const create_student_JSON = function (data){
         const formatted = [];
@@ -160,23 +184,21 @@ util.io = (function () {
             for(let j=0; j<data[0].length; j++){
                 //var student_name = data[j][0];
                 if(isNaN(data[i][j])){
-                    if(data[0][j].localeCompare("Preferences")==0){
+                    if(data[0][j].includes("Preference")){
                         if(data[i][j] != null){
-                            const prefs = data[i][j].split(", ");
-                            const mod = [];
-                            for(const p of prefs){
-                                mod.push("Amazon: " + p);
+                            if(!("preferences" in row)){
+                                row["preferences"] = [];
                             }
-                            row[data[0][j].toLowerCase()] = mod;
+                            row["preferences"].push(data[i][j]);
                         }
                         else{
-                            row[data[0][j].toLowerCase()] = [];
+                            row["preferences"] = [];
                         }
                     }
-                    else if(data[0][j].localeCompare("Least favorite")==0 && data[i][j]!=null){
+                    else if(data[0][j].localeCompare("Override")==0 && data[i][j]!=null){
                         const dict = {};
                         dict["person"] = data[i][0];
-                        dict["team"] = "Amazon: " + data[i][j];
+                        dict["team"] = data[i][j];
                         dict["value"] = false;
                         overrides.push(dict)
                     }
@@ -210,27 +232,10 @@ util.io = (function () {
                 }
                 else{
                     if(isNaN(data[i][j])){
-                        if(data[0][j].localeCompare("Interviewers")==0){
-                            const dict = {};
-                            dict["name"] = data[i][j];
-                            dict["timeslots"] = [];
-                            const arr = [dict];
-                            team[data[0][j].toLowerCase()] = arr;       
-                        }
-                        else if(data[0][j].localeCompare("Preferences")==0){
-                            team[data[0][j].toLowerCase()] = [];
-                        }
-                        else{
-                            team[data[0][j].toLowerCase()] = data[i][j];
-                        }                 
+                        team[data[0][j].toLowerCase()] = data[i][j];
+           
                     }
                     else{
-                        if(data[0][j].localeCompare("Positions")==0){
-                            for(let x=1; x<=data[i][j]; x++){
-                                team["interviewers"][0]["timeslots"].push("Monday_0" + x.toString());
-                            }
-                            team[data[0][j].toLowerCase()] = parseInt(data[i][j]);
-                        }
                         team[data[0][j].toLowerCase()] = parseInt(data[i][j]);
                     }
                 }
@@ -251,6 +256,81 @@ util.io = (function () {
         const final = {"companies": companies};
         return final;
     };
+
+    const add_interview_data = function(data, companies) {
+        for(let i=1; i<data.length; i++){
+            var company_name = data[i][0];
+            var team = data[i][0] + ": " + data[i][1];
+            var interviewer = "";
+            //var dict = companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team);
+            console.log(JSON.stringify(companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team), null, "\t"));
+            for(let j=0; j<data[0].length; j++){
+                if(!(data[0][j] == null)){
+                    if(data[0][j].localeCompare("Interviewers")==0){
+                        if(!("interviewers" in companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team))){
+                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"] = [];
+                        }
+                        interviewer = data[i][j];
+                        if((companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
+                            i => i.name === interviewer)) == null){
+                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].push({"name": interviewer});
+                        }
+                    }
+                    else if(data[0][j].includes("Time")){
+                       let timeslots = convert_timeblock(data[i][j]);
+                       //companies["companies"][company][team]["timeslots"] = timeslots;
+                       if(! ("timeslots" in companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
+                        i => i.name === interviewer))){
+                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
+                                i => i.name === interviewer)["timeslots"] = timeslots;
+                        }
+                        else{
+                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
+                                i => i.name === interviewer)["timeslots"].concat(timeslots);
+                        }
+                       
+                    }
+                    else if(data[0][j].includes("Preference")){
+                        if(! ("preferences" in companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team))){
+                            //companies["companies"][company][team]["preferences"] = [];
+                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["preferences"] = [];
+                        }
+                        if(!(data[i][j] == "")){
+                            //companies["companies"][company][team]["preferences"].push(data[i][j]);
+                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["preferences"].push(data[i][j]);
+                        }
+                    }
+                }
+                // else{
+                //     break;
+                // }
+            }
+        }
+        console.log(JSON.stringify(companies, null, "\t"));
+        return companies;
+    };
+
+    const convert_timeblock = function(timeblock){
+        const lst = timeblock.split(": ");
+        const day = lst[0].split(", ")[0];
+        const block = lst[1];
+        const morning = ["01", "02", "03", "04", "05", "06"];
+        const afternoon = ["07", "08", "09", "10", "11", "12"];
+        if(block.includes('am')){
+            return merge_timeslots(day, morning);
+        }
+        else{
+            return merge_timeslots(day, afternoon);
+        }
+    };
+
+    //day = "Monday", slots = ["01", "02"...]
+    const merge_timeslots = function(day, slots){
+        return slots.map(slot => `${day}_${slot}`);
+    };
+
+    const merge_timeslots_2 = (day, slots) => 
+        slots.map(slot => `${day}_${slot}`);
 
     const merge_JSON = function(data){
         console.log(data);
