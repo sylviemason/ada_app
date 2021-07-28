@@ -163,7 +163,7 @@ util.io = (function () {
             //.then(save_json);
     };
 
-    const load_data_to_JSON = async function(sheet_id, student_columns, team_columns){
+    const load_data_to_JSON = async function(sheet_id, student_columns, team_columns, team_input){
         const timeslots = generate_timeslots();
         const team_data = await load_google_sheet_data(sheet_id, ("'Team Responses'!"+team_columns));
         const student_data = await load_google_sheet_data(sheet_id, ("'Student Responses'!"+student_columns));
@@ -263,7 +263,6 @@ util.io = (function () {
             var team = data[i][0] + ": " + data[i][1];
             var interviewer = "";
             //var dict = companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team);
-            console.log(JSON.stringify(companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team), null, "\t"));
             for(let j=0; j<data[0].length; j++){
                 if(!(data[0][j] == null)){
                     if(data[0][j].localeCompare("Interviewers")==0){
@@ -306,7 +305,6 @@ util.io = (function () {
                 // }
             }
         }
-        console.log(JSON.stringify(companies, null, "\t"));
         return companies;
     };
 
@@ -333,7 +331,6 @@ util.io = (function () {
         slots.map(slot => `${day}_${slot}`);
 
     const merge_JSON = function(data){
-        console.log(data);
         const timeslots = data[0];
         const companies = data[1];
         const students = data[2];

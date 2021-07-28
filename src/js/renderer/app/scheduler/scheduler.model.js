@@ -139,7 +139,7 @@ scheduler.model = (function () {
     };
 
     const get_compatibility_score = function(student, company){
-        const scores = ["field", "structure level", "ambiguity", "own project", "mentorship", "working together"];
+        const scores = ["pair programming", "structure level", "ambiguity", "own project", "mentorship", "working together"];
         const to_flip = ["ambiguity", "own project"]
         var compatibility = 0;
         for(s of scores){
@@ -164,9 +164,6 @@ scheduler.model = (function () {
                         compatibility += diff * config.settings[scheduler.constants.MORE_STRUCTURED_TEAM_WEIGHT];
                     }
                 }
-            }
-            else{
-                break;
             }
         }
         return compatibility;
@@ -346,7 +343,7 @@ scheduler.model = (function () {
                 }
             }
         }
-
+        console.log(_var_name_to_data_map);
         let model_data = '';
 
         for (let i = 0; i < var_names.length; i++) {
