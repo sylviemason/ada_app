@@ -203,20 +203,20 @@ util.io.view = (function () {
             columns_input2.setAttribute('type', 'text');
 
             //input for team name 
-            let team_p = document.createElement('p');
-            url_div.appendChild(team_p);
-            team_p.appendChild(document.createTextNode('Input the team you want to create a schedule for: '));
+            let class_p = document.createElement('p');
+            url_div.appendChild(class_p);
+            class_p.appendChild(document.createTextNode('Input the team you want to create a schedule for: '));
 
-            let team_input = document.createElement('input');
-            url_div.appendChild(team_input);
-            team_input.setAttribute('type', 'text');
+            let class_input = document.createElement('input');
+            url_div.appendChild(class_input);
+            class_input.setAttribute('type', 'text');
 
             let enter_button = document.createElement('button');
             url_div.appendChild(enter_button);
             enter_button.appendChild(document.createTextNode('Enter'));
             $(enter_button).click(function () {
                 return resolve({canceled: false, sheet_url: url_input.value, student_columns: columns_input.value, 
-                team_columns: columns_input2.value, team_input: team_input.value});
+                team_columns: columns_input2.value, class_name: class_input.value});
             });
 
             let cancel_button = document.createElement('button');

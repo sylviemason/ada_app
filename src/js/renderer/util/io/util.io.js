@@ -30,8 +30,9 @@ util.io = (function () {
                     let sheet_id = sheet_url_to_sheet_id(result.sheet_url);
                     let student_columns = result.student_columns;
                     let team_columns = result.team_columns;
+                    let class_name = result.class_name;
                     if (sheet_id !== null) {
-                        return {canceled: false, sheet_id: sheet_id, student_columns: student_columns, team_columns: team_columns};
+                        return {canceled: false, sheet_id: sheet_id, student_columns: student_columns, team_columns: team_columns, class_name: class_name};
                     } else {
                         return Promise.reject('The URL did not match the expected sheet id pattern');
                     }
@@ -163,54 +164,58 @@ util.io = (function () {
             //.then(save_json);
     };
 
-    const load_data_to_JSON = async function(sheet_id, student_columns, team_columns, team_input){
+    const load_data_to_JSON = async function(sheet_id, student_columns, team_columns, class_name){
         const timeslots = generate_timeslots();
         const team_data = await load_google_sheet_data(sheet_id, ("'Team Responses'!"+team_columns));
         const student_data = await load_google_sheet_data(sheet_id, ("'Student Responses'!"+student_columns));
         const interview_data = await load_google_sheet_data(sheet_id, "'Team Interview Week Responses'!B:K");
-        const companies = await create_team_JSON(team_data);
-        const students = await create_student_JSON(student_data);
-        const updated_companies = await add_interview_data(interview_data, companies);
+        const companies = await create_team_JSON(team_data, class_name);
+        const students = await create_student_JSON(student_data, class_name);
+        const updated_companies = await add_interview_data(interview_data, companies, class_name);
         const json = await merge_JSON([timeslots, updated_companies, students]);
         const ret = JSON.stringify(json, null, "\t");
         return ret;
     }
 
-    const create_student_JSON = function (data){
+    const create_student_JSON = function (data, class_name){
+        console.log(class_name);
         const formatted = [];
         const overrides = [];
         for(let i=1; i<data.length; i++){
             const row = {};
-            for(let j=0; j<data[0].length; j++){
-                //var student_name = data[j][0];
-                if(isNaN(data[i][j])){
-                    if(data[0][j].includes("Preference")){
-                        if(data[i][j] != null){
-                            if(!("preferences" in row)){
+            let idx = data[0].indexOf("Class");
+            if(data[i][idx].localeCompare(class_name)==0){
+                for(let j=0; j<data[0].length; j++){
+                    //var student_name = data[j][0];
+                    if(isNaN(data[i][j])){
+                        if(data[0][j].includes("Preference")){
+                            if(data[i][j] != null){
+                                if(!("preferences" in row)){
+                                    row["preferences"] = [];
+                                }
+                                row["preferences"].push(data[i][j]);
+                            }
+                            else{
                                 row["preferences"] = [];
                             }
-                            row["preferences"].push(data[i][j]);
+                        }
+                        else if(data[0][j].localeCompare("Override")==0 && data[i][j]!=null){
+                            const dict = {};
+                            dict["person"] = data[i][0];
+                            dict["team"] = data[i][j];
+                            dict["value"] = false;
+                            overrides.push(dict)
                         }
                         else{
-                            row["preferences"] = [];
+                            row[data[0][j].toLowerCase()] = data[i][j];
                         }
                     }
-                    else if(data[0][j].localeCompare("Override")==0 && data[i][j]!=null){
-                        const dict = {};
-                        dict["person"] = data[i][0];
-                        dict["team"] = data[i][j];
-                        dict["value"] = false;
-                        overrides.push(dict)
-                    }
                     else{
-                        row[data[0][j].toLowerCase()] = data[i][j];
+                        row[data[0][j].toLowerCase()] = parseInt(data[i][j]);
                     }
                 }
-                else{
-                    row[data[0][j].toLowerCase()] = parseInt(data[i][j]);
-                }
+                formatted.push(row);
             }
-            formatted.push(row);
         } 
         const final = {
             "students" : formatted,
@@ -219,37 +224,39 @@ util.io = (function () {
         return final;
     };
     
-    const create_team_JSON = function (data){
+    const create_team_JSON = function (data, class_name){
         const companies = [];
         const companies_added = [];
         for(let i=1; i<data.length; i++){
             const team = {};
-            let company_name = data[i][0];
-            for(let j=0; j<data[0].length; j++){
-                let team_name = company_name+": "+data[i][j];
-                if(j==1){
-                    team[data[0][j].toLowerCase()]=team_name;
-                }
-                else{
-                    if(isNaN(data[i][j])){
-                        team[data[0][j].toLowerCase()] = data[i][j];
-           
+            let idx = data[0].indexOf("Class");
+            if(data[i][idx].includes(class_name)){
+                let company_name = data[i][0];
+                for(let j=0; j<data[0].length; j++){
+                    let team_name = company_name+": "+data[i][j];
+                    if(j==1){
+                        team[data[0][j].toLowerCase()]=team_name;
                     }
                     else{
-                        team[data[0][j].toLowerCase()] = parseInt(data[i][j]);
+                        if(isNaN(data[i][j])){
+                            team[data[0][j].toLowerCase()] = data[i][j];
+                        }
+                        else{
+                            team[data[0][j].toLowerCase()] = parseInt(data[i][j]);
+                        }
                     }
                 }
-            }
-            if(! companies_added.includes(company_name)){
-                companies.push({
-                    "name" : company_name,
-                    "teams" : []
-                });
-                companies_added.push(company_name);
-            }
-            for(let k=0; k<companies.length; k++){
-                if(companies[k]["name"].localeCompare(company_name)==0){
-                    companies[k]["teams"].push(team);
+                if(! companies_added.includes(company_name)){
+                    companies.push({
+                        "name" : company_name,
+                        "teams" : []
+                    });
+                    companies_added.push(company_name);
+                }
+                for(let k=0; k<companies.length; k++){
+                    if(companies[k]["name"].localeCompare(company_name)==0){
+                        companies[k]["teams"].push(team);
+                    }
                 }
             }
         }
@@ -257,52 +264,55 @@ util.io = (function () {
         return final;
     };
 
-    const add_interview_data = function(data, companies) {
+    const add_interview_data = function(data, companies, class_name) {
         for(let i=1; i<data.length; i++){
             var company_name = data[i][0];
             var team = data[i][0] + ": " + data[i][1];
             var interviewer = "";
-            //var dict = companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team);
-            for(let j=0; j<data[0].length; j++){
-                if(!(data[0][j] == null)){
-                    if(data[0][j].localeCompare("Interviewers")==0){
-                        if(!("interviewers" in companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team))){
-                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"] = [];
+            let idx = data[0].indexOf("Class");
+            if(data[i][idx].includes(class_name)){
+                //var dict = companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team);
+                for(let j=0; j<data[0].length; j++){
+                    if(!(data[0][j] == null)){
+                        if(data[0][j].localeCompare("Interviewers")==0){
+                            if(!("interviewers" in companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team))){
+                                companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"] = [];
+                            }
+                            interviewer = data[i][j];
+                            if((companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
+                                i => i.name === interviewer)) == null){
+                                companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].push({"name": interviewer});
+                            }
                         }
-                        interviewer = data[i][j];
-                        if((companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
-                            i => i.name === interviewer)) == null){
-                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].push({"name": interviewer});
+                        else if(data[0][j].includes("Time")){
+                        let timeslots = convert_timeblock(data[i][j]);
+                        //companies["companies"][company][team]["timeslots"] = timeslots;
+                        if(! ("timeslots" in companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
+                            i => i.name === interviewer))){
+                                companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
+                                    i => i.name === interviewer)["timeslots"] = timeslots;
+                            }
+                            else{
+                                companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
+                                    i => i.name === interviewer)["timeslots"].concat(timeslots);
+                            }
+                        
+                        }
+                        else if(data[0][j].includes("Preference")){
+                            if(! ("preferences" in companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team))){
+                                //companies["companies"][company][team]["preferences"] = [];
+                                companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["preferences"] = [];
+                            }
+                            if(!(data[i][j] == "")){
+                                //companies["companies"][company][team]["preferences"].push(data[i][j]);
+                                companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["preferences"].push(data[i][j]);
+                            }
                         }
                     }
-                    else if(data[0][j].includes("Time")){
-                       let timeslots = convert_timeblock(data[i][j]);
-                       //companies["companies"][company][team]["timeslots"] = timeslots;
-                       if(! ("timeslots" in companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
-                        i => i.name === interviewer))){
-                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
-                                i => i.name === interviewer)["timeslots"] = timeslots;
-                        }
-                        else{
-                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["interviewers"].find(
-                                i => i.name === interviewer)["timeslots"].concat(timeslots);
-                        }
-                       
-                    }
-                    else if(data[0][j].includes("Preference")){
-                        if(! ("preferences" in companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team))){
-                            //companies["companies"][company][team]["preferences"] = [];
-                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["preferences"] = [];
-                        }
-                        if(!(data[i][j] == "")){
-                            //companies["companies"][company][team]["preferences"].push(data[i][j]);
-                            companies["companies"].find(company => company.name === company_name)["teams"].find(t => t.name === team)["preferences"].push(data[i][j]);
-                        }
-                    }
+                    // else{
+                    //     break;
+                    // }
                 }
-                // else{
-                //     break;
-                // }
             }
         }
         return companies;

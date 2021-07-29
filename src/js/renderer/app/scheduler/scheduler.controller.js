@@ -24,7 +24,8 @@ scheduler.controller = (function () {
         util.io.get_google_sheet_id()
             .then(result => {
                 if (!result.canceled) {
-                   return util.io.load_data_to_JSON(result.sheet_id, result.student_columns, result.team_columns, result.team_input)
+                    console.log(result.class_name);
+                   return util.io.load_data_to_JSON(result.sheet_id, result.student_columns, result.team_columns, result.class_name)
                         .then(JSON.parse)
                         .then(scheduler.model.set_config)
                         .then(display_config_page)
