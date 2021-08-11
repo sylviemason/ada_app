@@ -11,7 +11,11 @@ const scheduler = (function () {
 
         ipcRenderer.on('scheduler.loadGoogleSheet', function (e) {
             scheduler.controller.handle_google_sheet();
-        })
+        });
+
+        ipcRenderer.on('scheduler.createFinalSchedule', function(e){
+            scheduler.controller.handle_final_schedule();
+        });
     };
 
     const get_landing_generator_fn = function () {

@@ -43,6 +43,14 @@ scheduler.view = (function () {
                 scheduler.controller.handle_google_sheet();
             });
 
+            //create final schedule
+            let create_schedule_button = document.createElement('button');
+            scheduler_div.appendChild(create_schedule_button);
+
+            create_schedule_button.appendChild(document.createTextNode('Create Final Schedule'));
+            $(create_schedule_button).click(function(){
+                scheduler.controller.handle_final_schedule();
+            });
             return scheduler_div;
         };
     };

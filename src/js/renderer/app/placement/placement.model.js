@@ -38,7 +38,7 @@ placement.model = (function () {
         for (let i = 1; i < data_array.length; i++) {
             let row = data_array[i];
 
-            let overwrite = row.length >= 5 ? row[4].toLowerCase() : '';
+            let overwrite = row.length >= 10 ? row[9].toLowerCase() : '';
             if (overwrite === '') {
                 overwrite = null;
             } else if (overwrite === 'true') {
@@ -55,6 +55,11 @@ placement.model = (function () {
                 company: row[1],
                 person_score: row[2],
                 company_score: row[3],
+                student_tz: row[4],
+                team_tz: row[5],
+                student_difficulty: row[6],
+                team_difficulty: row[7],
+                notes: row[8],
                 score: compute_join_score(row[2], row[3]),
                 overwrite: overwrite
             };
@@ -153,7 +158,8 @@ placement.model = (function () {
     };
 
     const _save_placements_to_array = function(scores_array) {
-        let values = [['Person', 'Company', 'Person Score', 'Company Score', 'Joint Score', 'Overwrite']];
+        let values = [['Person', 'Company', 'Person Score', 'Company Score', 'Joint Score', 'Student Timezone', 'Team Timezone', 'Student Difficulty',
+        'Team Difficulty', 'Notes', 'Overwrite']];
         for (let i = 0; i < scores_array.length; i++) {
             let s = scores_array[i];
             values.push([
@@ -162,6 +168,11 @@ placement.model = (function () {
                 s.person_score,
                 s.company_score,
                 s.score,
+                s.student_tz,
+                s.team_tz,
+                s.student_difficulty,
+                s.team_difficulty,
+                s.notes,
                 s.overwrite === null ? s.overwrite : s.overwrite.toString()
             ]);
         }

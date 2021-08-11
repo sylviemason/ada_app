@@ -229,10 +229,44 @@ util.io.view = (function () {
         });
     };
 
+    const get_google_sheet_id_2 = function(){
+        return new Promise((resolve, reject) => {
+            clear_container();
+
+            let url_div = document.createElement('div');
+            $container.append(url_div);
+
+            //inputs for google sheet link
+            let url_p = document.createElement('p');
+            url_div.appendChild(url_p);
+            url_p.appendChild(document.createTextNode('Paste the URL of a Google Sheet: '));
+
+            let url_input = document.createElement('input');
+            url_div.appendChild(url_input);
+            url_input.setAttribute('type', 'text');
+
+            let enter_button = document.createElement('button');
+            url_div.appendChild(enter_button);
+            enter_button.appendChild(document.createTextNode('Enter'));
+            $(enter_button).click(function () {
+                return resolve({canceled: false, sheet_url: url_input.value});
+            });
+
+            let cancel_button = document.createElement('button');
+            url_div.appendChild(cancel_button);
+
+            cancel_button.appendChild(document.createTextNode('Cancel'));
+            $(cancel_button).click(function() {
+                return resolve({canceled: true});
+            });
+        });
+    };
+
     return {
         init_module: init_module,
         get_google_creds: get_google_creds,
         get_auth_code: get_auth_code,
-        get_google_sheet_id: get_google_sheet_id
+        get_google_sheet_id: get_google_sheet_id,
+        get_google_sheet_id_2: get_google_sheet_id_2
     };
 }());

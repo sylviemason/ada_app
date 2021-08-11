@@ -24,10 +24,10 @@ placement.controller = (function () {
     };
 
     const handle_load_sheet = function () {
-        util.io.get_google_sheet_id()
+        util.io.get_google_sheet_id_2()
             .then(result => {
                 if (!result.canceled) {
-                    return util.io.load_google_sheet_data(result.sheet_id, 'A:E')
+                    return util.io.load_google_sheet_data(result.sheet_id, 'A:J')
                         .then(placement.model.load_scores_from_array)
                         .then(() => placement.view.display_scores_page(placement.model.get_scores(), placement.model.get_settings()))
                         .catch(err => {

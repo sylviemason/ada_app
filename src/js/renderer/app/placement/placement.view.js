@@ -494,7 +494,8 @@ placement.view = (function () {
         let header_row = document.createElement('tr');
         scores_table_head.append(header_row);
 
-        let col_names = ['person', 'company', 'student score', 'team score', 'joint score', 'overwrites'];
+        let col_names = ['Person', 'Company', 'Student Score', 'Team Score', 'Joint Score', 'Student Timezone', 'Team Timezone', 'Student Difficulty', 'Team Difficulty', 
+        'Notes', 'overwrites'];
         for (let i = 0; i < col_names.length; i++) {
             let column_name = col_names[i];
             let header = document.createElement('th');
@@ -511,7 +512,11 @@ placement.view = (function () {
             row.appendChild(_create_table_entry(document.createTextNode(scores[i].person_score)));
             row.appendChild(_create_table_entry(document.createTextNode(scores[i].company_score)));
             row.appendChild(_create_table_entry(document.createTextNode(scores[i].score)));
-
+            row.appendChild(_create_table_entry(document.createTextNode(scores[i].student_tz)));
+            row.appendChild(_create_table_entry(document.createTextNode(scores[i].team_tz)));
+            row.appendChild(_create_table_entry(document.createTextNode(scores[i].student_difficulty)));
+            row.appendChild(_create_table_entry(document.createTextNode(scores[i].team_difficulty)));
+            row.appendChild(_create_table_entry(document.createTextNode(scores[i].notes)));
             row.appendChild(_create_table_entry(_create_overwrite_select(scores[i])));
 
             scores_table_body.appendChild(row);

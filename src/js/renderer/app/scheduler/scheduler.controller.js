@@ -1,3 +1,5 @@
+const { unwatchFile } = require("fs");
+
 scheduler.controller = (function () {
     const get_landing_generator_fn = function () {
         return scheduler.view.get_landing_generator_fn();
@@ -24,12 +26,14 @@ scheduler.controller = (function () {
         util.io.get_google_sheet_id()
             .then(result => {
                 if (!result.canceled) {
-                    console.log(result.class_name);
                    return util.io.load_data_to_JSON(result.sheet_id, result.student_columns, result.team_columns, result.class_name)
                         .then(JSON.parse)
                         .then(scheduler.model.set_config)
                         .then(display_config_page)
-                        .catch(alert);
+                        .catch(err => {
+                            alert(err);
+                            landing.start();
+                        });
                 }
                 else {
                     landing.start();
@@ -39,6 +43,16 @@ scheduler.controller = (function () {
                 alert(err);
                 landing.start();
             });
+    };
+
+    //handle final schedule creation
+    const handle_final_schedule = async function(){
+        const result = await util.io.get_google_sheet_id_2();
+        const data = await util.io.get_final_schedule_data(result.sheet_id);
+        console.log(data);
+        const id = await util.io.save_final_to_sheet("Final Interview Schedule", data);
+        await alert("Schedule saved to" + id);
+        //Todo: return
     };
 
     const display_config_page = function() {
@@ -98,6 +112,7 @@ scheduler.controller = (function () {
         get_landing_generator_fn: get_landing_generator_fn,
         handle_load_file: handle_load_file,
         handle_google_sheet: handle_google_sheet,
+        handle_final_schedule: handle_final_schedule,
         handle_calculate_button_clicked: handle_calculate_button_clicked,
         handle_setting_change: handle_setting_change,
         handle_back_to_configs_button_clicked: handle_back_to_configs_button_clicked,
