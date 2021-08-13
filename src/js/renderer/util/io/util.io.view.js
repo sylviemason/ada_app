@@ -202,10 +202,10 @@ util.io.view = (function () {
             url_div.appendChild(columns_input2);
             columns_input2.setAttribute('type', 'text');
 
-            //input for team name 
+            //input for class name 
             let class_p = document.createElement('p');
             url_div.appendChild(class_p);
-            class_p.appendChild(document.createTextNode('Input the team you want to create a schedule for: '));
+            class_p.appendChild(document.createTextNode('Input the class you want to create a schedule for: '));
 
             let class_input = document.createElement('input');
             url_div.appendChild(class_input);

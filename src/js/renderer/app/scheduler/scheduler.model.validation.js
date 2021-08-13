@@ -169,24 +169,24 @@ scheduler.model.validation = (function () {
             }
 
             // ensure all listed students appear in student definitions
-            for (let i = 0; i < config.companies.length; i++) {
-                const company = config.companies[i];
-                for (let j = 0; j < company.teams.length; j++) {
-                    const team = company.teams[j];
-                    for (let k = 0; k < team.preferences.length; k++) {
-                        if (!all_students.includes(team.preferences[k])) {
-                            return reject('Company ' + i + ', Team ' + j + ' has the student preference ' +
-                                team.preferences[k] + ' which is not listed in the "students"');
-                        }
-                    }
-                }
-            }
-            for (let i = 0; i < config.overrides.length; i++) {
-                if (!all_students.includes(config.overrides[i].person)) {
-                    return reject('Override ' + i + ' has the student ' + config.overrides[i].person +
-                        ' which is not listed in the "students"');
-                }
-            }
+            // for (let i = 0; i < config.companies.length; i++) {
+            //     const company = config.companies[i];
+            //     for (let j = 0; j < company.teams.length; j++) {
+            //         const team = company.teams[j];
+            //         for (let k = 0; k < team.preferences.length; k++) {
+            //             if (!all_students.includes(team.preferences[k])) {
+            //                 return reject('Company ' + i + ', Team ' + j + ' has the student preference ' +
+            //                     team.preferences[k] + ' which is not listed in the "students"');
+            //             }
+            //         }
+            //     }
+            // }
+            // for (let i = 0; i < config.overrides.length; i++) {
+            //     if (!all_students.includes(config.overrides[i].person)) {
+            //         return reject('Override ' + i + ' has the student ' + config.overrides[i].person +
+            //             ' which is not listed in the "students"');
+            //     }
+            // }
 
             // ensure all listed teams appear in the company team definitions
             for (let i = 0; i < config.students.length; i++) {

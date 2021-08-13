@@ -680,30 +680,30 @@ util.io = (function () {
                     }
                 });
             }
-            await sheets.spreadsheets.batchUpdate({
-                spreadsheetId: new_spreadsheet.data.spreadsheetId,
-                requestBody: {
-                    requests: [
-                        {
-                            repeatCell: {
-                                range: {
-                                    sheetId: 0,
-                                    startRowIndex: 0,
-                                    endRowIndex: 1
-                                },
-                                cell: {
-                                    userEnteredFormat: {
-                                        textFormat: {
-                                            bold: true
-                                        }
-                                    }
-                                },
-                                fields: "userEnteredFormat.textFormat.bold"
-                            }
-                        }
-                    ]
-                }
-            });
+            // await sheets.spreadsheets.batchUpdate({
+            //     spreadsheetId: new_spreadsheet.data.spreadsheetId,
+            //     requestBody: {
+            //         requests: [
+            //             {
+            //                 repeatCell: {
+            //                     range: {
+            //                         sheetId: 0,
+            //                         startRowIndex: 0,
+            //                         endRowIndex: 1
+            //                     },
+            //                     cell: {
+            //                         userEnteredFormat: {
+            //                             textFormat: {
+            //                                 bold: true
+            //                             }
+            //                         }
+            //                     },
+            //                     fields: "userEnteredFormat.textFormat.bold"
+            //                 }
+            //             }
+            //         ]
+            //     }
+            // });
         }
         catch (err) {
             const id = new_spreadsheet.data.spreadsheetId;

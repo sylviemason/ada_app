@@ -536,8 +536,8 @@ scheduler.view = (function () {
         // scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_0_SCORE,"Student - Team Difficulty Score 0"));
         // scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_MINUS1_SCORE,"Student - Team Difficulty Score -1"));
         // scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.DIFFICULTY_DIFF_MINUS2_SCORE,"Student - Team Difficulty Score -2"));
-        scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.MORE_STRUCTURED_TEAM_WEIGHT,"Weight for more structured team score"));
-        scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.LESS_STRUCTURED_TEAM_WEIGHT,"Weight for less structured team score"));
+        scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.MORE_STRUCTURED_TEAM_WEIGHT,"Weight for more supportive team score"));
+        scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.LESS_STRUCTURED_TEAM_WEIGHT,"Weight for less supportive team score"));
         scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.IS_STUDENT_PREF_SCORE,"Student Preference Score"));
         scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.IS_TEAM_PREF_SCORE,"Team Preference Score"));
         scoring_div.appendChild(_create_num_setting(settings, scheduler.constants.IS_MUTUAL_PREF_SCORE,"Mutual Preference Score"));
@@ -678,7 +678,7 @@ scheduler.view = (function () {
         schedule_table_head.appendChild(header_row);
 
         let col_names = ['student name', 'company name', 'team name', 'interviewer name', 'timeslot',
-            'is student preference?', 'is team preference?', 'compatability', 'score', 'difficulty difference', 'override'];
+            'is student preference?', 'is team preference?', 'compatability', 'score', 'support difference', 'override'];
         for (let i = 0; i < col_names.length; i++) {
             let column_name = col_names[i];
             let header = document.createElement('th');

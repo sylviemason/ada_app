@@ -142,32 +142,37 @@ scheduler.model = (function () {
         const scores = ["pair programming", "structure level", "ambiguity", "own project", "mentorship", "working together"];
         const to_flip = ["ambiguity", "own project"]
         var compatibility = 0;
-        for(s of scores){
-            if(student.hasOwnProperty(s) && company.hasOwnProperty(s)){
-                if(s.localeCompare("field")==0){
-                    if(student[s]===company[s]){
-                        compatibility += 20; 
+        for(const [key, value] of Object.entries(student)){
+        //for(s of scores){
+            if(student.hasOwnProperty(key) && company.hasOwnProperty(key)){
+                if(key.localeCompare("field")==0){
+                    if(student[key]===company[key]){
+                        //compatibility += 20; 
+                        compatibility += 1;
                     }
                 }
-                else{
-                    var diff = 0;
-                    if(to_flip.includes(s)){
-                        diff = flip(company[s]) - flip(student[s]);
+                else if(!isNaN(value)){
+                    if(key.localeCompare("score")!==0){
+                        var diff = 0;
+                        if(to_flip.includes(key)){
+                            diff = flip(company[key]) - flip(student[key]);
+                        }
+                        else{
+                            diff = company[key] - student[key];
+                        }
+                        if(diff < 0){
+                            compatibility += diff * config.settings[scheduler.constants.LESS_STRUCTURED_TEAM_WEIGHT];
+                        }
+                        else{
+                            compatibility += diff * config.settings[scheduler.constants.MORE_STRUCTURED_TEAM_WEIGHT];
+                        }
                     }
-                    else{
-                        diff = company[s] - student[s];
-                    }
-                    if(diff < 0){
-                        compatibility += diff * config.settings[scheduler.constants.LESS_STRUCTURED_TEAM_WEIGHT];
-                    }
-                    else{
-                        compatibility += diff * config.settings[scheduler.constants.MORE_STRUCTURED_TEAM_WEIGHT];
-                    }
+                
                 }
             }
         }
         return compatibility;
-    }
+    };
 
     const _create_ampl_model = function () {
         _var_name_to_data_map = {};
